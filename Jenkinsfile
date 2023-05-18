@@ -45,7 +45,7 @@ pipeline {
 
         stage('Deploy New Image to AWS EC2'){
             steps{
-                sh 'ech "Deploying to EC2...'
+                sh 'echo "Deploying to EC2..."'
                 //SSH into our remote server
                 //Shut down the current running image
                 //Pull the new image that was just pushed
