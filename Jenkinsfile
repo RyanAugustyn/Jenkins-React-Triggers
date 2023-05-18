@@ -33,6 +33,14 @@ pipeline {
 
                     docker images
                 '''
+
+                //Access the personal-docker-credentials
+                //Use the to login to Docker through the login CLI command
+                withCredentials([usernamePassword(credentialsId: 'personal-dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASWORD')]){
+                sh "echo ${DOCKER_USERNAME}"
+                //Push the image to your personal Docker Hub repo
+                sh 'docker push ryanaugustyn/react-jenkins-docker:1'
+                }
             }
         }
     }
