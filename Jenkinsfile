@@ -1,47 +1,58 @@
 pipeline {
     agent any
 
+    environment{
+        def nodejsTool = tool name: 'node-20-tool', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
+        def dockerTool = tool name: 'docker-latest-tool', type: 'org.jenkinsci.plugins.docker.commons.tools.DockerTool'
+        PATH = "${nodejsTool}/bin:${dockerTool}/bin:${env.PATH}"
+    }
+
     stages {
 
-        stage('Build'){
+        stage('Install Dependencies'){
             steps {
 
-                script{
-                    def nodejsTool = tool name: 'node-20-tool', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
-                    env.PATH = "${nodejsTool}/bin:${env.PATH}"
-                }
-                sh '''
-                echo "Building the application..."
-                npm install
-                npm run-script build
-                '''
+                sh 'npm install'
             }
         }
 
-        stage('Docker'){
+        stage('Create Production React Build'){
             steps {
-                script{
-                    def dockerTool = tool name: 'docker-latest-tool', type: 'org.jenkinsci.plugins.docker.commons.tools.DockerTool'
-                    env.PATH = "${dockerTool}/bin:${env.PATH}"
-                }
+
+                sh 'npm run-script build'
+            }
+        }
+
+        stage('Build Docker Image'){
+            steps {
+  
                 sh '''
-                    echo "Dockerizing the application..."
-                    docker --version
-                    docker images
-
                     docker build -t ryanaugustyn/react-jenkins-docker:1 .
-
                     docker images
                 '''
-
-                //Access the personal-docker-credentials
-                //Use the to login to Docker through the login CLI command
                 
                 withCredentials([usernamePassword(credentialsId: 'personal-dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASWORD')]){
                 sh "echo ${DOCKER_USERNAME}"
-                //Push the image to your personal Docker Hub repo
                 sh 'docker push ryanaugustyn/react-jenkins-docker:1'
                 }
+            }
+        }
+
+        stage('Push Docker Image'){
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'personal-dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASWORD')]){
+                sh "echo ${DOCKER_USERNAME}"
+                sh 'docker push ryanaugustyn/react-jenkins-docker:1'
+                }
+            }
+        }
+
+        stage('Deploy New Image to AWS EC2'){
+            steps{
+                //SSH into our remote server
+                //Shut down the current running image
+                //Pull the new image that was just pushed
+                //Launch thtat new image running on our remote server
             }
         }
     }
