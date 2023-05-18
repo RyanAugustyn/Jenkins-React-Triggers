@@ -29,7 +29,7 @@ pipeline {
                     docker --version
                     docker images
 
-                    docker build -t ryanaugustyn/react-jenkins-docker:1
+                    docker build -t ryanaugustyn/react-jenkins-docker:1 .
 
                     docker images
                 '''
