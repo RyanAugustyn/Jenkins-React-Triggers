@@ -9,14 +9,14 @@ pipeline {
 
     stages {
 
-        stage('Install Dependencies'){
+        stage('Installing Dependencies'){
             steps {
 
                 sh 'npm install'
             }
         }
 
-        stage('Create Production React Build'){
+        stage('Build Optimized React Production Files'){
             steps {
 
                 sh 'npm run-script build'
@@ -30,18 +30,14 @@ pipeline {
                     docker build -t ryanaugustyn/react-jenkins-docker:1 .
                     docker images
                 '''
-                
-                withCredentials([usernamePassword(credentialsId: 'personal-dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASWORD')]){
-                sh "echo ${DOCKER_USERNAME}"
-                sh 'docker push ryanaugustyn/react-jenkins-docker:1'
-                }
             }
         }
 
-        stage('Push Docker Image'){
+        stage('Push Docker Image to Docker Hub'){
             steps {
                 withCredentials([usernamePassword(credentialsId: 'personal-dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASWORD')]){
                 sh "echo ${DOCKER_USERNAME}"
+                sh 'docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}'
                 sh 'docker push ryanaugustyn/react-jenkins-docker:1'
                 }
             }
