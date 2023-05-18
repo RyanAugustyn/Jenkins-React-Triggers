@@ -35,7 +35,7 @@ pipeline {
 
         stage('Push Docker Image to Docker Hub'){
             steps {
-                withCredentials([usernamePassword(credentialsId: 'personal-dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASWORD')]){
+                withCredentials([usernamePassword(credentialsId: 'personal-dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]){
                 sh "echo ${DOCKER_USERNAME}"
                 sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
                 sh 'docker push ryanaugustyn/react-jenkins-docker:1'
