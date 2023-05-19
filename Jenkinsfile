@@ -48,10 +48,22 @@ pipeline {
         stage('Deploy New Image to AWS EC2'){
             steps{
                 sh 'echo "Deploying to EC2..."'
-                //SSH into our remote server
+                //SSH into our remote server using ssh agent plugin
+                //StrictHostKey auto adds new host keys, suppresses prompt to accept fingerprints
                 //Shut down the current running image
                 //Pull the new image that was just pushed
                 //Launch thtat new image running on our remote server
+                sshagent(['music-library-linux-kp-ssh-credentials']){
+                    sh """ 
+                        SSH_COMMAND = "ssh -o StrictHostKeyChecking=no ubuntu@3.137.211.60"
+                        \$SSH_COMMAND "docker stop hosted-react-app && docker rm hosted-react-app"
+                        \$SSH_COMMAND "docker pull ryanaugustyn/react-jenkins-docker:$BUILD_NUMBER"
+                        \$SSH_COMMAND "docker run -d -p 80:80 --name hosted-react-app ryanaugustyn/react-jenkins-docker:$BUILD_NUMBER"
+
+                    """
+                }
+                
+                
             }
         }
     }
