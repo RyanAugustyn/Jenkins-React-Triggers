@@ -26,20 +26,22 @@ pipeline {
         stage('Build Docker Image'){
             steps {
   
-                sh '''
-                    docker build -t ryanaugustyn/react-jenkins-docker:1 .
+                sh """
+                    docker build -t ryanaugustyn/react-jenkins-docker:$BUILD_NUMBER .
                     docker images
-                '''
+                """
             }
         }
 
         stage('Push Docker Image to Docker Hub'){
             steps {
                 withCredentials([usernamePassword(credentialsId: 'personal-dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]){
-                sh "echo ${DOCKER_USERNAME}"
+
                 sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
-                sh 'docker push ryanaugustyn/react-jenkins-docker:1'
+                
                 }
+
+                sh "docker push ryanaugustyn/react-jenkins-docker:$BUILD_NUMBER"
             }
         }
 
